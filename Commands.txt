@@ -1,0 +1,16 @@
+
+CPU TEMP:
+	cat /sys/class/thermal/thermal_zone2/temp 
+	# In Celsius e.g., 51500 = 51.5 C
+	
+cat /proc/meminfo | grep '^Mem'
+	MemTotal:        7880552 kB
+	MemFree:         2411524 kB
+	MemAvailable:    4330752 kB
+
+df -h / 
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/mmcblk2p2   57G   13G   42G  23% /
+
+
+
