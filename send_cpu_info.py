@@ -36,13 +36,28 @@ class ParseException(Exception):
         
     def getMessage():
         return msg
-try:
-    ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1, write_timeout=20,
-                        parity=serial.PARITY_NONE, bytesize=serial.EIGHTBITS)  # open serial port
-except:
-    ser = serial.Serial('/dev/ttyACM1', 9600, timeout=1, write_timeout=20,
-                        parity=serial.PARITY_NONE, bytesize=serial.EIGHTBITS)
+    
+serial_port = 0
+serial_connected = False
 
+while not serial_connected and serial_port < 5:
+    try:
+        print("Attempting to connect to " + '/dev/ttyACM' + str(serial_port))
+        
+        ser = serial.Serial('/dev/ttyACM' + str(serial_port), 9600, timeout=1, write_timeout=20,
+                            parity=serial.PARITY_NONE, bytesize=serial.EIGHTBITS)  # open serial port
+        
+        print("Connected to serial port")
+        
+        serial_connected = True
+    except:
+        serial_port += 1
+
+
+if not serial_connected:
+        print("Failed to open serial port")
+        sys.exit(1)
+    
 def to_byte_array(f_val: float):
     return bytearray(struct.pack("f", f_val))
     #return binascii.hexlify(struct.pack('f',f_val))
