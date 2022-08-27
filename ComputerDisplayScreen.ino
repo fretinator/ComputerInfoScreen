@@ -3,8 +3,6 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-#define isDebug false
-
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
 #define LINE_1 2
@@ -19,6 +17,7 @@ const char LCD_LINE1 = 0x00;
 const char LCD_LINE2 = 0x40;
 const char LCD_LINE3 = 0x14;
 const char LCD_LINE4 = 0x54;
+const bool isDebug = false;
 
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 // The pins for I2C are defined by the Wire-library. 
@@ -307,23 +306,64 @@ void flushSerialInput() {
 
     debug("Total bytes flushed from serial input: " + String(total_bytes_read));
 }
+
+
+void scanI2CBus() {
+  byte error, address;
+  int nDevices;
+
+  debug("Scanning...");
+
+  nDevices = 0;
+  for(address = 1; address < 127; address++ ) 
+  {
+    // The i2c_scanner uses the return value of
+    // the Write.endTransmisstion to see if
+    // a device did acknowledge to the address.
+    Wire.beginTransmission(address);
+    error = Wire.endTransmission();
+
+    if (error == 0)
+    {
+      String addr("I2C device found at address 0x");
+      
+      if (address<16) 
+        addr += "0";
+
+      addr += String(address,HEX);        
+      addr += "  !";
+      debug(addr);
+
+      nDevices++;
+    }
+    else if (error==4) 
+    {
+      String err = String("Unknown error at address 0x");
+      if (address<16) 
+        err += "0";
+      err += String(address,HEX);
+
+      debug(err);
+    }    
+  }
+  if (nDevices == 0)
+   debug("No I2C devices found\n");
+  else
+    debug("done\n");
+
+  delay(5000);           // wait 5 second to view results
+}
 void setup() {
   Serial.begin(9600);
+  Wire.begin();
 
   setupLCD();
 
- // debug("Starting SSP...");
- // ssp.init();
- // debug("SSP started.");
-
-
- // delay(100);
-
-//  debug("Registering SSP receive command...");
+  debug("Preparing to scan I2C bus...");
   
-//  ssp.registerCommand(CMD_ID_RECEIVE, receiveMessage);
+  //scanI2CBus();
 
-//  debug("SSP receive command registered");  
+  debug("Done scanning I2C bus");
 
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   debug("Starting I2C display");
